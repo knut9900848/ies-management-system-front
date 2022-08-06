@@ -8,7 +8,7 @@ import { QTableProps } from 'quasar';
 interface Company {
   id: number;
   name: string;
-  logo: string;
+  image: string;
   code: string;
   is_active: boolean;
   description: string;
@@ -75,7 +75,7 @@ const editedIndex = ref<number>(-1);
 const editedItem = reactive<Company>({
   id: 0,
   name: '',
-  logo: '',
+  image: '',
   code: '',
   is_active: false,
   description: '',
@@ -84,7 +84,7 @@ const editedItem = reactive<Company>({
 const resetEditedItem = reactive<Company>({
   id: 0,
   name: '',
-  logo: '',
+  image: '',
   code: '',
   is_active: false,
   description: '',
@@ -113,11 +113,15 @@ const saveCompany = async (param: Param): Promise<void> => {
       );
       Object.assign(companies.value[editedIndex.value], response.data.company);
 
-      param.formData.append('model', 'Company');
-      param.formData.append('modelId', response.data.company.id);
+      if (param.formData.get('attached') === 'yes') {
+        console.log('files');
+        param.formData.append('model', 'Company');
+        param.formData.append('modelId', response.data.company.id);
+        param.formData.append('storage', 'company_image');
 
-      const fileResponse = await api.post('/attach-file', param.formData);
-      companies.value[editedIndex.value].logo = fileResponse.data.logo;
+        const fileResponse = await api.post('/files', param.formData);
+        companies.value[editedIndex.value].image = fileResponse.data.image;
+      }
 
       closeCompanyEditModal();
     } catch (error) {
@@ -127,10 +131,21 @@ const saveCompany = async (param: Param): Promise<void> => {
     try {
       const response = await api.post('/companies', param.company);
       companies.value.push(response.data.company);
-      closeCompanyEditModal();
 
-      // const fileResponse = await api.post('/attach-file', param.formData);
-      // companies.value[editedIndex.value].logo = fileResponse.data.logo;
+      if (param.formData.get('attached') === 'yes') {
+        param.formData.append('model', 'Company');
+        param.formData.append('modelId', response.data.company.id);
+        param.formData.append('storage', 'company_image');
+
+        const fileResponse = await api.post('/files', param.formData);
+        editedIndex.value = companies.value.findIndex(
+          (item) => item.id === response.data.company.id
+        );
+
+        companies.value[editedIndex.value].image = fileResponse.data.image;
+      }
+
+      closeCompanyEditModal();
     } catch (error) {
       console.log(error);
     }
@@ -164,6 +179,22 @@ const saveCompany = async (param: Param): Promise<void> => {
           color="primary"
           size="sm"
         ></q-btn>
+      </template>
+
+      <template v-slot:body-cell-name="props">
+        <q-td key="name" :props="props" :id="props.row.id">
+          <q-img
+            v-if="props.row.image"
+            :src="`http://localhost/storage/company/images/${props.row.image}`"
+            style="width: 35px; height: 35px"
+          ></q-img>
+          <q-img
+            v-else
+            src="../assets/images/default_logo.png"
+            style="width: 35px; height: 35px"
+          ></q-img>
+          <span class="q-ml-sm">{{ props.row.name }}</span>
+        </q-td>
       </template>
 
       <template v-slot:body-cell-action="props">

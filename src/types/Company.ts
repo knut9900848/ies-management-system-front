@@ -1,7 +1,7 @@
 interface Company {
   id: number;
   name: string;
-  logo: string;
+  image: string;
   code: string;
   is_active: boolean;
   description: string;

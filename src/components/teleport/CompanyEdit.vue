@@ -4,12 +4,12 @@ import { Ref } from 'vue';
 // import Company from '../../types/Company';
 import useVuelidate from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
-import FileUpload from '../FileUpload.vue';
+import SingleImageUpload from '../SingleImageUpload.vue';
 
 interface Company {
   id: number;
   name: string;
-  logo: string;
+  image: string;
   code: string;
   is_active: boolean;
   description: string;
@@ -33,7 +33,7 @@ const emit = defineEmits<{
 const company: Company = reactive({
   id: 0,
   name: '',
-  logo: '',
+  image: '',
   code: '',
   is_active: false,
   description: '',
@@ -50,10 +50,12 @@ const v$ = useVuelidate(rules, company);
 
 const formData: FormData = new FormData();
 
-const attachFiles = (selectedFiles: Ref<Blob[]>): void => {
-  selectedFiles.value.forEach((item, index) => {
-    formData.append(`selectedFiles[${index}]`, item);
+const attachFiles = (files: Ref<Blob[]>): void => {
+  files.value.forEach((item, index) => {
+    formData.append(`files[${index}]`, item);
   });
+
+  formData.append('attached', 'yes');
 };
 </script>
 
@@ -105,7 +107,10 @@ const attachFiles = (selectedFiles: Ref<Blob[]>): void => {
         </div>
 
         <div class="col-12 q-pa-xs">
-          <FileUpload @attachFiles="attachFiles"></FileUpload>
+          <SingleImageUpload
+            @attachFiles="attachFiles"
+            accept=".png, .jpge, .jpg, image/*"
+          ></SingleImageUpload>
         </div>
 
         <div class="col-12 q-pa-xs">
