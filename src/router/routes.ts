@@ -13,6 +13,11 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/admin/categories/:kinds',
+    component: () => import('src/pages/admin/CategoryList.vue'),
+  },
+
+  {
     path: '/notices',
     name: 'notice.list',
     component: () => import('pages/NoticeList.vue'),

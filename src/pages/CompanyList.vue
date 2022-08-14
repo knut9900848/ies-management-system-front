@@ -93,8 +93,11 @@ const resetEditedItem = reactive<Company>({
 const companyEditModal = ref(false);
 
 const openCompanyEditModal = (company: Company | null): void => {
-  if (company !== null) editedIndex.value = companies.value.indexOf(company);
-  Object.assign(editedItem, company) ?? company;
+  if (company !== null) {
+    editedIndex.value = companies.value.indexOf(company);
+    Object.assign(editedItem, company);
+  }
+
   companyEditModal.value = true;
 };
 

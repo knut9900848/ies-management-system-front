@@ -1,15 +1,8 @@
 <script setup lang="ts">
 import { reactive } from 'vue';
-import { Ref } from 'vue';
-import Company from '../../types/Company';
+import { Category } from '../../types/Category';
 import useVuelidate from '@vuelidate/core';
 import { required } from '@vuelidate/validators';
-import SingleImageUpload from '../SingleImageUpload.vue';
-
-interface Param {
-  company: Company;
-  formData: FormData;
-}
 
 const props = defineProps<{
   title: string;
@@ -17,37 +10,26 @@ const props = defineProps<{
 }>();
 
 const emit = defineEmits<{
-  (e: 'saveCompany', param: Param): void;
-  (e: 'closeCompanyEditModal'): void;
+  (e: 'saveCategory', category: Category): void;
+  (e: 'closeCategoryEditModal'): void;
 }>();
 
-const company: Company = reactive({
+const category: Category = reactive({
   id: 0,
   name: '',
-  image: '',
   code: '',
   is_active: false,
   description: '',
 });
 
-Object.assign(company, props.editedItem);
+Object.assign(category, props.editedItem);
 
 const rules = {
   name: { required },
   code: { required },
 };
 
-const v$ = useVuelidate(rules, company);
-
-const formData: FormData = new FormData();
-
-const attachFiles = (files: Ref<Blob[]>): void => {
-  files.value.forEach((item, index) => {
-    formData.append(`files[${index}]`, item);
-  });
-
-  formData.append('attached', 'yes');
-};
+const v$ = useVuelidate(rules, category);
 </script>
 
 <template>
@@ -58,7 +40,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
       <div>
         <div class="text-h6">{{ props.title }}</div>
         <div class="text-subtitle2">
-          {{ company.name ? company.name : 'Add New Client' }}
+          {{ category.name ? category.name : 'Add New Asset Category' }}
         </div>
       </div>
 
@@ -69,7 +51,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
         flat
         round
         dense
-        @click="emit('closeCompanyEditModal')"
+        @click="emit('closeCategoryEditModal')"
       />
     </q-card-section>
 
@@ -80,7 +62,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
         <div class="col-6 q-pa-xs">
           <q-input
             label="Name *"
-            v-model="company.name"
+            v-model="category.name"
             @blur="v$.name.$touch()"
             no-error-icon
             :error="v$.name.$error"
@@ -90,7 +72,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
         <div class="col-6 q-pa-xs">
           <q-input
             label="Code *"
-            v-model="company.code"
+            v-model="category.code"
             @blur="v$.code.$touch()"
             no-error-icon
             :error="v$.code.$error"
@@ -98,22 +80,15 @@ const attachFiles = (files: Ref<Blob[]>): void => {
         </div>
 
         <div class="col-12 q-pa-xs">
-          <SingleImageUpload
-            @attachFiles="attachFiles"
-            accept=".png, .jpge, .jpg, image/*"
-          ></SingleImageUpload>
-        </div>
-
-        <div class="col-12 q-pa-xs">
           <q-toggle
             label="Activation"
-            v-model="company.is_active"
+            v-model="category.is_active"
             :true-value="1"
             :false-value="0"
           />
         </div>
         <div class="col-12 q-pa-xs">
-          <q-input v-model="company.description" type="textarea"></q-input>
+          <q-input v-model="category.description" type="textarea"></q-input>
         </div>
       </q-form>
     </q-card-section>
@@ -123,12 +98,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
     <q-card-actions align="right">
       <q-btn
         label="Save"
-        @click="
-          emit('saveCompany', {
-            company: company,
-            formData: formData,
-          })
-        "
+        @click="emit('saveCategory', category)"
         flat
         color="primary"
         :disabled="v$.$invalid"
@@ -137,7 +107,7 @@ const attachFiles = (files: Ref<Blob[]>): void => {
         label="Close"
         flat
         color="danger"
-        @click="emit('closeCompanyEditModal')"
+        @click="emit('closeCategoryEditModal')"
       ></q-btn>
     </q-card-actions>
   </q-card>
